@@ -1,0 +1,16 @@
+# .env dosyası için template
+# Bu dosyayı .env olarak kaydedin ve değerleri girin
+
+# OpenAI API Key
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Port (optional, defaults to 5000)
+PORT=5000
+
+# PLM OAuth Credentials - BR Tenant (JKARFH4LCGZA78A5_PRD)
+PLM_CLIENT_ID=JKARFH4LCGZA78A5_PRD~v5Lc4NhRCRBgIWqu66v3decDkOnua6U1B2r5cJ8DXpA
+PLM_CLIENT_SECRET=b719ZdA_4L3IV8jcJWoeloGiJBglqafNoAxM14DoZaWHSGrD8GGVvio8JyHP2F-MaYOfgiFIxuapPetzNqKVqA
+PLM_USERNAME=JKARFH4LCGZA78A5_PRD#mH9888ZyFUwKPgkaeuzTyrH_-rdRitN-NCy_HnCf_fJXLxCCvdRnXGFvcveTd8LJtl-OtTld-ZTpq_szty0UPg
+PLM_PASSWORD=ABGwIcLtfqiAzr6cilIAnV8Q7tCF0DKU-M8JHGtrUiWh9voH73XUwfyRQCJc3UFNGu5y9xU22AFyDv2TQ7_S9A
+PLM_TOKEN_URL=https://mingle-sso.eu1.inforcloudsuite.com:443/JKARFH4LCGZA78A5_PRD/as/token.oauth2
+PLM_API_URL=https://mingle-ionapi.eu1.inforcloudsuite.com/JKARFH4LCGZA78A5_PRD/FASHIONPLM/pdm/api/pdm/material/v2/save

@@ -1,0 +1,42 @@
+{
+  "name": "AI Fabric Analysis & PLM Integration",
+  "description": "ChatGPT Vision ile kumaş etiket görsellerini analiz edip PLM'de otomatik kumaş kodu açan API",
+  "repository": "https://github.com/KaanKaraca93/AIFabricCreatePOC",
+  "logo": "https://cdn-icons-png.flaticon.com/512/2103/2103633.png",
+  "keywords": [
+    "nodejs",
+    "express",
+    "chatgpt",
+    "vision",
+    "plm",
+    "fabric",
+    "textile",
+    "ai",
+    "infor"
+  ],
+  "image": "heroku/nodejs",
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-nodejs"
+    }
+  ],
+  "stack": "heroku-24",
+  "env": {
+    "OPENAI_API_KEY": {
+      "description": "OpenAI API Key for ChatGPT Vision",
+      "required": true
+    },
+    "NODE_ENV": {
+      "description": "Node environment",
+      "value": "production"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "addons": []
+}
+

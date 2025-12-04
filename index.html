@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kumaş Analiz Sistemi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .result-item {
+            display: flex;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #555;
+            min-width: 150px;
+        }
+        
+        .result-value {
+            color: #333;
+            flex: 1;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c00;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .error.show {
+            display: block;
+        }
+        
+        .example {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .example strong {
+            color: #856404;
+        }
+        
+        .example code {
+            background: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧵 Kumaş Analiz Sistemi</h1>
+        <p class="subtitle">ChatGPT ile Otomatik Kumaş Etiketi Analizi</p>
+        
+        <div class="input-group">
+            <label for="imageUrl">Kumaş Etiketi Görsel URL'i:</label>
+            <input 
+                type="text" 
+                id="imageUrl" 
+                placeholder="https://example.com/fabric-label.jpg"
+            >
+        </div>
+        
+        <button class="btn" onclick="analyzeImage()">
+            🔍 Analiz Et
+        </button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #666;">Görsel analiz ediliyor...</p>
+        </div>
+        
+        <div class="error" id="error"></div>
+        
+        <div class="result" id="result">
+            <h3>📊 Analiz Sonuçları</h3>
+            <div class="result-item">
+                <span class="result-label">🏭 Kumaş Tedarikçisi:</span>
+                <span class="result-value" id="tedarikcisi">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">🔖 Tedarikçi Kodu:</span>
+                <span class="result-value" id="tedarikci_kodu">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">🧬 Elyaf İçeriği:</span>
+                <span class="result-value" id="elyaf_icerigi">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">⚖️ Gramaj:</span>
+                <span class="result-value" id="gramaj">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">📏 Kumaş Eni:</span>
+                <span class="result-value" id="en">-</span>
+            </div>
+        </div>
+        
+        <div class="example">
+            <strong>💡 Not:</strong> Test etmek için internet üzerinde erişilebilir bir görsel URL'i kullanın. 
+            Örnek: <code>https://i.imgur.com/xyz.jpg</code>
+        </div>
+    </div>
+
+    <script>
+        async function analyzeImage() {
+            const imageUrl = document.getElementById('imageUrl').value.trim();
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const error = document.getElementById('error');
+            const btn = document.querySelector('.btn');
+            
+            // Reset
+            result.classList.remove('show');
+            error.classList.remove('show');
+            
+            // Validation
+            if (!imageUrl) {
+                error.textContent = '❌ Lütfen bir görsel URL\'i girin!';
+                error.classList.add('show');
+                return;
+            }
+            
+            // Show loading
+            loading.classList.add('show');
+            btn.disabled = true;
+            btn.textContent = '⏳ Analiz ediliyor...';
+            
+            try {
+                const response = await fetch('http://localhost:5000/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ image_url: imageUrl })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show results
+                    document.getElementById('tedarikcisi').textContent = data.data.tedarikcisi;
+                    document.getElementById('tedarikci_kodu').textContent = data.data.tedarikci_kodu;
+                    document.getElementById('elyaf_icerigi').textContent = data.data.elyaf_icerigi;
+                    document.getElementById('gramaj').textContent = data.data.gramaj;
+                    document.getElementById('en').textContent = data.data.en;
+                    
+                    result.classList.add('show');
+                } else {
+                    error.textContent = '❌ Hata: ' + data.error;
+                    error.classList.add('show');
+                }
+            } catch (err) {
+                error.textContent = '❌ API\'ye bağlanılamadı! API\'nin çalıştığından emin olun.';
+                error.classList.add('show');
+            } finally {
+                loading.classList.remove('show');
+                btn.disabled = false;
+                btn.textContent = '🔍 Analiz Et';
+            }
+        }
+        
+        // Enter key support
+        document.getElementById('imageUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                analyzeImage();
+            }
+        });
+    </script>
+</body>
+</html>
