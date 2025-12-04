@@ -1,8 +1,10 @@
 openapi: 3.0.0
 info:
-  title: AI Fabric Analysis & PLM Integration API
+  title: AI Fabric Analysis & PLM Integration API - BR Tenant
   description: |
     ChatGPT Vision ile kumaş etiket görsellerini analiz edip PLM'de otomatik kumaş kodu açan API.
+    
+    **Tenant:** JKARFH4LCGZA78A5_PRD (BR_Entegrasyon)
     
     **Akış:**
     1. PLM'den görsel URL alınır
@@ -15,8 +17,9 @@ info:
     - ✅ 9 farklı elyaf tipi, 40+ kod varyasyonu
     - ✅ Dinamik elyaf desteği (1-5 elyaf)
     - ✅ OAuth 2.0 token yönetimi
-    - ✅ Infor Fashion PLM entegrasyonu
+    - ✅ Infor Fashion PLM entegrasyonu (BR Tenant)
     - ✅ ION API formatı
+    - ✅ Health Check sistemi (OpenAI, PLM, GitHub)
     
   version: 1.0.0
   contact:
@@ -25,10 +28,10 @@ info:
     name: MIT
 
 servers:
-  - url: https://your-app.herokuapp.com
-    description: Production server (Heroku)
-  - url: http://localhost:5000
-    description: Development server
+  - url: https://br-image-to-fabric-d512063e011c.herokuapp.com
+    description: Production server (Heroku - BR Tenant)
+  - url: http://localhost:5001
+    description: Development server (Local)
 
 tags:
   - name: Health
