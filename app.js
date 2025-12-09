@@ -7,6 +7,9 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const OpenAI = require('openai');
+const FormData = require('form-data');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -1234,7 +1237,7 @@ async function addSupplierPrice(token, materialId, materialSupplierId, rowVersio
 /**
  * PLM'de kumaş kodu aç
  */
-async function createMaterialInPLM(plmData) {
+async function createMaterialInPLM(plmData, imageUrl = null) {
     try {
         console.log('🏭 PLM\'de kumaş kodu açılıyor...');
         
@@ -1304,11 +1307,62 @@ async function createMaterialInPLM(plmData) {
             console.log('ℹ️  Fiyat bilgisi yok, atlanıyor');
         }
         
+        // Görsel yükleme (varsa)
+        let imageResult = null;
+        if (imageUrl) {
+            try {
+                console.log('📷 Görsel yükleniyor...');
+                
+                // Görseli indir
+                const { filePath, fileName } = await downloadImage(imageUrl);
+                
+                try {
+                    // 1. Görseli PLM'e yükle
+                    const uploadResponse = await uploadImageToPLM(token, filePath, fileName, materialKey);
+                    
+                    if (uploadResponse.addedFiles && uploadResponse.addedFiles.length > 0) {
+                        // 2. Metadata kaydet (ana görsel olarak işaretle)
+                        const metadataResponse = await saveImageMetadata(token, uploadResponse, materialKey);
+                        
+                        imageResult = {
+                            success: true,
+                            object_key: uploadResponse.addedFiles[0].objectKey,
+                            thumb_url: uploadResponse.addedFiles[0].thumbUrl,
+                            preview_url: uploadResponse.addedFiles[0].customUrl
+                        };
+                        
+                        console.log('✅ Görsel başarıyla ana görsel olarak eklendi!');
+                    } else {
+                        imageResult = {
+                            success: false,
+                            error: 'Görsel yüklenemedi'
+                        };
+                        console.warn('⚠️  Görsel yüklenemedi ama kumaş başarıyla oluşturuldu');
+                    }
+                } finally {
+                    // Geçici dosyayı temizle
+                    if (filePath && fs.existsSync(filePath)) {
+                        fs.unlinkSync(filePath);
+                        console.log('🧹 Geçici dosya temizlendi');
+                    }
+                }
+            } catch (imageError) {
+                console.error('❌ Görsel yükleme hatası:', imageError.message);
+                imageResult = {
+                    success: false,
+                    error: imageError.message
+                };
+            }
+        } else {
+            console.log('ℹ️  Görsel bilgisi yok, atlanıyor');
+        }
+        
         return {
             success: true,
             plm_response: response.data,
             sourcing_response: sourcingResult,
             price_response: priceResult,
+            image_response: imageResult,
             material_description: `${plmData.Tedarikcisi} - ${plmData.Tedarikci_Kodu}`
         };
 
@@ -1705,10 +1759,13 @@ app.post('/analyze-and-create', async (req, res) => {
         let plmResult = null;
         if (create_in_plm !== false) {  // Default true
             console.log('\n🏭 ADIM 2: PLM\'de Kumaş Kodu Açma');
-            plmResult = await createMaterialInPLM(analysisResult.data);
+            plmResult = await createMaterialInPLM(analysisResult.data, image_url);
             
             if (plmResult.success) {
                 console.log('✅ PLM\'de kumaş kodu açıldı');
+                if (plmResult.image_response?.success) {
+                    console.log('📷 Ana görsel eklendi');
+                }
             } else {
                 console.log('⚠️  PLM kumaş açma başarısız (analiz sonucu döndürülüyor)');
             }
@@ -1811,6 +1868,190 @@ app.post('/test-plm', async (req, res) => {
     }
 });
 
+/*********************************************************
+ * GÖRSEL YÜKLEME FONKSİYONLARI
+ *********************************************************/
+
+const DOCUMENTS_BASE = 'https://mingle-ionapi.eu1.inforcloudsuite.com/JKARFH4LCGZA78A5_PRD/FASHIONPLM/documents';
+
+/**
+ * Görseli URL'den indir ve geçici dosyaya kaydet
+ */
+async function downloadImage(imageUrl) {
+    console.log('📥 Görsel indiriliyor:', imageUrl);
+    
+    try {
+        const response = await axios.get(imageUrl, {
+            responseType: 'arraybuffer',
+            maxRedirects: 5
+        });
+
+        console.log('✅ Görsel indirildi, boyut:', response.data.length, 'bytes');
+
+        const tempFileName = `temp_${Date.now()}.jpg`;
+        const tempFilePath = path.join(__dirname, tempFileName);
+        fs.writeFileSync(tempFilePath, response.data);
+        
+        // Dosya adını URL'den al, extension yoksa .jpg ekle
+        let baseName = path.basename(imageUrl).split('?')[0] || 'fabric_image';
+        if (!baseName.match(/\.(jpg|jpeg|png|gif)$/i)) {
+            baseName = baseName + '.jpg';
+        }
+        
+        return {
+            filePath: tempFilePath,
+            fileName: baseName
+        };
+    } catch (error) {
+        console.error('❌ Görsel indirme hatası:');
+        console.error('Status:', error.response?.status);
+        console.error('Status Text:', error.response?.statusText);
+        console.error('URL:', imageUrl);
+        throw new Error(`Görsel indirilemedi: ${error.message}`);
+    }
+}
+
+function generateTempId() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+async function uploadImageToPLM(token, filePath, originalFileName, materialId) {
+    try {
+        console.log('📤 Görsel yükleniyor:', materialId);
+
+        const form = new FormData();
+        const attaData = {
+            objectFilePath: `blob:temp/${originalFileName}`,
+            objectExtension: null,
+            sequence: 0,
+            details: { name: null, note: null },
+            referenceId: materialId.toString(),
+            modifyDate: "0001-01-01T00:00:00",
+            code: "E0023",  // Sabit değer
+            isDefault: false,
+            objectId: 0,
+            originalObjectName: originalFileName,
+            objectStream: null,
+            tempId: generateTempId()
+        };
+
+        form.append('atta', JSON.stringify(attaData));
+        form.append('type', 'undefined');
+        form.append('formType', 'file');
+        form.append('schema', 'FSH1');
+        form.append('overwrite', 'false');
+        form.append('file', fs.createReadStream(filePath), {
+            filename: originalFileName,
+            contentType: 'image/jpeg'
+        });
+
+        console.log('🔗 API URL:', `${DOCUMENTS_BASE}/api/document/UploadFile`);
+
+        const response = await axios.post(`${DOCUMENTS_BASE}/api/document/UploadFile`, form, {
+            headers: { ...form.getHeaders(), 'Authorization': `Bearer ${token}` },
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity
+        });
+
+        console.log('✅ Upload Response:', JSON.stringify(response.data, null, 2));
+
+        return response.data;
+    } catch (error) {
+        console.error('❌ Upload hatası:');
+        console.error('Status:', error.response?.status);
+        console.error('Response:', JSON.stringify(error.response?.data, null, 2));
+        console.error('Message:', error.message);
+        throw error;
+    }
+}
+
+async function saveImageMetadata(token, uploadResponse, materialId) {
+    console.log('📋 Metadata kaydediliyor...');
+
+    const addedFile = uploadResponse.addedFiles[0];
+    const metadataPayload = {
+        AttaFileListDto: [{
+            ...addedFile,
+            referenceId: materialId.toString(),
+            code: "E0023",  // Sabit değer
+            isDefault: true, // ANA GÖRSEL!
+            tempId: addedFile.tempId || generateTempId()
+        }],
+        Schema: "FSH1"
+    };
+
+    const response = await axios.post(`${DOCUMENTS_BASE}/api/document/SaveMetadata/`, metadataPayload, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+
+    return response.data;
+}
+
+/*********************************************************
+ * TEST ENDPOINT: GÖRSEL YÜKLEME
+ *********************************************************/
+
+app.post('/test-image-upload', async (req, res) => {
+    let tempFilePath = null;
+
+    try {
+        const { image_url, material_id } = req.body;
+
+        if (!image_url || !material_id) {
+            return res.status(400).json({
+                success: false,
+                error: 'image_url ve material_id gerekli'
+            });
+        }
+
+        const token = await getAccessToken();
+        const { filePath, fileName } = await downloadImage(image_url);
+        tempFilePath = filePath;
+
+        const uploadResponse = await uploadImageToPLM(token, filePath, fileName, material_id);
+        
+        if (!uploadResponse.addedFiles || uploadResponse.addedFiles.length === 0) {
+            throw new Error('Görsel yüklenemedi');
+        }
+
+        const metadataResponse = await saveImageMetadata(token, uploadResponse, material_id);
+
+        res.json({
+            success: true,
+            message: 'Görsel ana görsel olarak eklendi',
+            object_key: uploadResponse.addedFiles[0].objectKey,
+            thumb_url: uploadResponse.addedFiles[0].thumbUrl,
+            preview_url: uploadResponse.addedFiles[0].customUrl
+        });
+
+    } catch (error) {
+        console.error('❌ Test başarısız:', error.message);
+        console.error('Stack:', error.stack);
+        if (error.response) {
+            console.error('Response Status:', error.response.status);
+            console.error('Response Data:', JSON.stringify(error.response.data, null, 2));
+        }
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            error_data: error.response?.data,
+            error_stack: error.stack
+        });
+    } finally {
+        if (tempFilePath && fs.existsSync(tempFilePath)) {
+            fs.unlinkSync(tempFilePath);
+            console.log('🧹 Geçici dosya temizlendi');
+        }
+    }
+});
+
 // Server başlat
 app.listen(PORT, () => {
     console.log('🚀 Kumaş Analiz API başlatılıyor...');
@@ -1819,10 +2060,12 @@ app.listen(PORT, () => {
     console.log(`📊 Analyze Endpoint: http://localhost:${PORT}/analyze`);
     console.log(`🏭 Analyze + Create: http://localhost:${PORT}/analyze-and-create`);
     console.log(`🧪 Test PLM: http://localhost:${PORT}/test-plm`);
+    console.log(`📷 Test Image: http://localhost:${PORT}/test-image-upload`);
     console.log('');
     console.log('⚡ Akış 1: PLM URL → Analiz → JSON');
     console.log('⚡ Akış 2: PLM URL → Analiz → PLM Kumaş Açma → JSON');
     console.log('⚡ Akış 3: Test Data → PLM (test için)');
+    console.log('⚡ Akış 4: Görsel Yükleme (test için)');
     console.log('');
 });
 

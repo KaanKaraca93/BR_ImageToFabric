@@ -8,7 +8,8 @@
     "dev": "nodemon app.js",
     "test": "node test.js",
     "test:health": "node test_health.js",
-    "test:all": "npm run test:health && npm run test"
+    "test:all": "npm run test:health && npm run test",
+    "test:image": "node test_image_upload.js"
   },
   "keywords": [
     "fabric",
@@ -24,11 +25,10 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "form-data": "^4.0.5",
     "openai": "^4.20.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
   }
 }
-
-

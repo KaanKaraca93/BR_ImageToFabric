@@ -4,3 +4,7 @@ plm_token.txt
 test_request.json
 test_plm_only.json
 plm_test_payload.json
+test_image_request.json
+temp_*.jpg
+temp_*.jpeg
+temp_*.png
