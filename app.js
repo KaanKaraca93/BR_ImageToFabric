@@ -886,11 +886,92 @@ async function addMaterialSupplier(token, materialId) {
         
         console.log('✅ Tedarikçi başarıyla eklendi!');
         
+        // Response'dan materialSupplierId al
+        const materialSupplierId = response.data.materialSuppliersDto?.[0]?.materialSupplierId;
+        
+        if (!materialSupplierId) {
+            console.warn('⚠️  materialSupplierId bulunamadı, ana tedarikçi ayarlanamadı');
+            return {
+                success: true,
+                response: response.data,
+                supplier_code: "1111111111",
+                supplier_name: "BR_KUMAS_FIYAT",
+                main_supplier_set: false
+            };
+        }
+        
+        console.log(`🔄 Ana tedarikçi olarak işaretleniyor... (SupplierId: ${materialSupplierId})`);
+        
+        // 2. Adım: Ana tedarikçi olarak işaretle (UpdateMain)
+        const updateMainPayload = {
+            MaterialId: String(materialId),
+            MaterialSuppliers: [
+                {
+                    Key: materialSupplierId,
+                    MaterialId: String(materialId),
+                    FieldValues: [
+                        {
+                            FieldName: "MaterialId",
+                            Value: parseInt(materialId)
+                        },
+                        {
+                            FieldName: "SourcingName",
+                            Value: "BR_KUMAS_FIYAT"
+                        },
+                        {
+                            FieldName: "IsEem",
+                            Value: false
+                        },
+                        {
+                            FieldName: "IsMain",
+                            Value: 1
+                        },
+                        {
+                            FieldName: "SourcingCode",
+                            Value: "1111111111"
+                        },
+                        {
+                            FieldName: "SupplierId",
+                            Value: 135
+                        },
+                        {
+                            FieldName: "Name",
+                            Value: "BR_KUMAS_FIYAT"
+                        }
+                    ]
+                }
+            ],
+            userId: 124,
+            modifyId: 124,
+            notificationMessageKey: "UPDATED_MATERIAL_PARTNERS",
+            action: "UpdateMain",
+            moduleId: parseInt(materialId),
+            Schema: "FSH1"
+        };
+        
+        console.log('📦 UpdateMain Payload:', JSON.stringify(updateMainPayload, null, 2));
+        
+        const updateResponse = await axios.post(
+            sourcingUrl,
+            updateMainPayload,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        
+        console.log('✅ Ana tedarikçi başarıyla ayarlandı!');
+        
         return {
             success: true,
-            response: response.data,
+            add_response: response.data,
+            update_main_response: updateResponse.data,
             supplier_code: "1111111111",
-            supplier_name: "BR_KUMAS_FIYAT"
+            supplier_name: "BR_KUMAS_FIYAT",
+            material_supplier_id: materialSupplierId,
+            main_supplier_set: true
         };
         
     } catch (error) {
