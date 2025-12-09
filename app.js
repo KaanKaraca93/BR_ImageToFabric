@@ -594,6 +594,12 @@ function createPLMMaterialPayload(plmData) {
             Value: [1],
             ValueName: "150 cm",
             Code: "150"
+        },
+        {
+            FieldName: "MaterialUserDefinedField11",
+            Value: 2,
+            ValueName: "YERLİ KUMAŞ",
+            Code: "002"
         }
     ];
 
@@ -650,16 +656,8 @@ function createPLMMaterialPayload(plmData) {
             value: 10
         },
         {
-            fieldName: "ActWidth",
-            value: plmData.En || 0
-        },
-        {
             fieldName: "Weight",
             value: plmData.Gramaj || 0
-        },
-        {
-            fieldName: "ActWidthUOMId",
-            value: 3
         }
     ];
 
@@ -707,7 +705,7 @@ function createPLMMaterialPayload(plmData) {
         idGenContextVal2: "[]",
         locale: "en-US",
         cultureInfos: null,
-        Schema: "FSH2"
+        Schema: "FSH1"
     };
 
     return payload;
@@ -1180,6 +1178,56 @@ app.post('/analyze-and-create', async (req, res) => {
     }
 });
 
+// Test endpoint - Direkt PLM'e test verisi gönder
+app.post('/test-plm', async (req, res) => {
+    const startTime = Date.now();
+    
+    try {
+        const testData = {
+            Tedarikcisi: "TEST KUMAŞ A.Ş.",
+            Tedarikci_Kodu: "TEST-001",
+            Gramaj: 200,
+            En: 150,
+            Elyaf1Yuzde: 80,
+            Elyaf1: "Poliester",
+            Elyaf1Id: 63,
+            Elyaf1Code: "PES",
+            Elyaf2Yuzde: 20,
+            Elyaf2: "Pamuk",
+            Elyaf2Id: 56,
+            Elyaf2Code: "COT"
+        };
+
+        console.log('\n🧪 TEST ENDPOINT: Direkt PLM Test');
+        console.log('='.repeat(70));
+        console.log('📦 Test Data:', JSON.stringify(testData, null, 2));
+
+        const plmResult = await createMaterialInPLM(testData);
+
+        console.log('='.repeat(70));
+        console.log('🎉 Test Tamamlandı!\n');
+
+        res.json({
+            success: true,
+            test_data: testData,
+            plm_result: plmResult,
+            metadata: {
+                processing_time_ms: Date.now() - startTime
+            }
+        });
+
+    } catch (error) {
+        console.error('\n❌ Test Hatası:', error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            metadata: {
+                processing_time_ms: Date.now() - startTime
+            }
+        });
+    }
+});
+
 // Server başlat
 app.listen(PORT, () => {
     console.log('🚀 Kumaş Analiz API başlatılıyor...');
@@ -1187,9 +1235,11 @@ app.listen(PORT, () => {
     console.log(`🔍 Health Check: http://localhost:${PORT}/health`);
     console.log(`📊 Analyze Endpoint: http://localhost:${PORT}/analyze`);
     console.log(`🏭 Analyze + Create: http://localhost:${PORT}/analyze-and-create`);
+    console.log(`🧪 Test PLM: http://localhost:${PORT}/test-plm`);
     console.log('');
     console.log('⚡ Akış 1: PLM URL → Analiz → JSON');
     console.log('⚡ Akış 2: PLM URL → Analiz → PLM Kumaş Açma → JSON');
+    console.log('⚡ Akış 3: Test Data → PLM (test için)');
     console.log('');
 });
 

@@ -1,0 +1,157 @@
+{
+  "Key": 0,
+  "userId": "124",
+  "notificationMessageKey": "CREATED_MATERIAL_OVERVIEW",
+  "ModifyId": "124",
+  "FieldValues": [
+    {
+      "FieldName": "MainCategoryId",
+      "Value": 5,
+      "ValueName": "Yapay Zeka",
+      "Code": "AI"
+    },
+    {
+      "FieldName": "Description",
+      "Value": "TEST KUMAŞ A.Ş. - TEST-001",
+      "ValueName": "TEST KUMAŞ A.Ş. - TEST-001"
+    },
+    {
+      "FieldName": "MaterialCode",
+      "Value": null,
+      "ValueName": null
+    },
+    {
+      "FieldName": "MaterialName",
+      "Value": null,
+      "ValueName": null
+    },
+    {
+      "FieldName": "CreateId",
+      "Value": 124
+    },
+    {
+      "FieldName": "Original_Name",
+      "Value": ""
+    },
+    {
+      "FieldName": "Original_Description",
+      "Value": ""
+    },
+    {
+      "FieldName": "Status",
+      "Value": 105,
+      "ValueName": 105
+    },
+    {
+      "FieldName": "UserDefinedField5",
+      "Value": 8,
+      "ValueName": "%10",
+      "Code": "DT008"
+    },
+    {
+      "FieldName": "UOMId",
+      "Value": 9,
+      "ValueName": "Mt",
+      "Code": "MT"
+    },
+    {
+      "FieldName": "MaterialUserDefinedField12Ids",
+      "Value": [1],
+      "ValueName": "150 cm",
+      "Code": "150"
+    },
+    {
+      "FieldName": "MaterialUserDefinedField11",
+      "Value": 2,
+      "ValueName": "YERLİ KUMAŞ",
+      "Code": "002"
+    },
+    {
+      "FieldName": "ContPercent1",
+      "Value": 80,
+      "ValueName": 80,
+      "Code": null
+    },
+    {
+      "FieldName": "GLContentTypeId1",
+      "Value": 63,
+      "ValueName": "Poliester",
+      "Code": "PES"
+    },
+    {
+      "FieldName": "ContPercent2",
+      "Value": 20,
+      "ValueName": 20,
+      "Code": null
+    },
+    {
+      "FieldName": "GLContentTypeId2",
+      "Value": 56,
+      "ValueName": "Pamuk",
+      "Code": "COT"
+    },
+    {
+      "FieldName": "WeightUOMId",
+      "Value": 10,
+      "Code": "GR",
+      "ValueName": "Gr"
+    },
+    {
+      "FieldName": "Weight",
+      "Value": 200,
+      "Code": null,
+      "ValueName": 200
+    },
+    {
+      "FieldName": "IsSetAsMainSupplier",
+      "Value": false
+    }
+  ],
+  "SubEntities": [
+    {
+      "key": 0,
+      "subEntity": "MaterialConst",
+      "fieldValues": [
+        {
+          "fieldName": "WeightUOMId",
+          "value": 10
+        },
+        {
+          "fieldName": "Weight",
+          "value": 200
+        }
+      ],
+      "subEntities": []
+    },
+    {
+      "key": 0,
+      "subEntity": "MaterialConstContent",
+      "fieldValues": [
+        {
+          "fieldName": "GLContentTypeId1",
+          "value": 63
+        },
+        {
+          "fieldName": "ContPercent1",
+          "value": 80
+        },
+        {
+          "fieldName": "GLContentTypeId2",
+          "value": 56
+        },
+        {
+          "fieldName": "ContPercent2",
+          "value": 20
+        }
+      ],
+      "subEntities": []
+    }
+  ],
+  "ModuleId": 0,
+  "idGenContextVal": "",
+  "idGenContextVal2": "[]",
+  "locale": "en-US",
+  "cultureInfos": null,
+  "Schema": "FSH1"
+}
+
