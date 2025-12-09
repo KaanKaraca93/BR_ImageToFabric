@@ -147,3 +147,4 @@ npm run test:all
 **Status:** ⚙️ Setup in Progress  
 **Next Step:** OpenAI API Key ekle ve local test yap
 
+

@@ -188,17 +188,38 @@ Content-Type: application/json
 
 ## 🧬 Elyaf Mapping Tablosu
 
-| Görsel Kodu | PLM Code | PLM Name | PLM Id |
-|-------------|----------|----------|--------|
-| PE, PES, PL, POLYESTER | PES | Polyester | 13 |
-| CO, COT, COTTON | COT | Pamuk | 9 |
-| VI, CV, VSK, VISCOSE | VSK | Viskon | 14 |
-| LI, LIN, LINEN | LIN | Keten | 6 |
-| EA, ELS, ELASTAN, SPANDEX | ELS | Elastan | 4 |
-| PA, PAM, POLYAMIDE | PAM | Poliamid | 10 |
+**86 elyaf tipi desteklenir!** En yaygın kullanılanlar:
+
+| Görsel Kodu | PLM Code | PLM Name (TR) | PLM Id |
+|-------------|----------|---------------|--------|
+| PE, PES, PL, PET, POLYESTER | PES | Poliester | 63 |
+| CO, COT, COTTON | COT | Pamuk | 56 |
+| VI, CV, VSK, VSC, VISCOSE | VSK/VSC | Viskon/Viskoz | 84/78 |
+| LI, LIN, LINEN | LIN | Keten | 40 |
+| EA, ELS, ELASTANE, SPANDEX, LYCRA | ELS | Elastan | 20 |
+| PA, PAM, POLYAMIDE, NYLON | PAM | Poliamid | 58 |
+| NY, NYL, NYLON | NYL | Naylon | 86 |
 | ACR, ACRYLIC | ACR | Akrilik | 1 |
-| MOD, MODAL | MOD | Modal | 3 |
-| BAM, BAMBOO | BAM | Bambu | 2 |
+| MOD, MDL, MODAL | MDL | Modal | 54 |
+| BAM, BAMBOO | BAM | Bambu | 11 |
+| WO, WOO, WOOL | WOO | Yün | 81 |
+| SLK, SILK | SLK | İpek | 31 |
+| LYC, LYOCELL | LYC | Lyocell | 47 |
+| TNS, TENSEL, TENCEL | TNS | Tensel | 83 |
+| ACE, ACETATE | ACE | Asetat | 9 |
+| PP, PPL, POLYPROPYLENE | PPL | Polipropilen | 60 |
+| PU, PUR, POLYURETHANE | PUR | Poliüretan | 61 |
+| PVC, PCL | PCL | PVC | 62 |
+| CSH, CASHMERE | CSH | Kaşmir | 37 |
+| MHR, MOHAIR | MHR | Moher | 55 |
+| LEA, LEATHER | LEA | Deri | 17 |
+| LRX, LUREX | LRX | Lureks | 48 |
+| RAM, RAMIE | RAM | Rami | 65 |
+| HMP, HEMP | HMP | Kenevir | 39 |
+| JUT, JUTE | JUT | Jut | 32 |
+| SIS, SISAL | SIS | Sisal | 69 |
+
+📝 **Not:** Tam liste 86 elyaf içerir. Yukarıda en sık kullanılanlar gösterilmiştir.
 
 ## 🧪 Test
 

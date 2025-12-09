@@ -78,50 +78,408 @@ async function getAccessToken() {
     return accessToken;
 }
 
-// Elyaf Dönüşüm Tablosu (PLM'den alınan)
+// Elyaf Dönüşüm Tablosu (BR Tenant - JKARFH4LCGZA78A5_PRD)
+// PLM OData API'den alınan 86 elyaf tipi
 const ELYAF_MAPPING = {
+    // Acrylic / Akrilik (Id: 1)
     "ACR": { Id: 1, Code: "ACR", Name: "Akrilik" },
     "AKRİLİK": { Id: 1, Code: "ACR", Name: "Akrilik" },
     "ACRYLIC": { Id: 1, Code: "ACR", Name: "Akrilik" },
     
-    "BAM": { Id: 2, Code: "BAM", Name: "Bambu" },
-    "BAMBU": { Id: 2, Code: "BAM", Name: "Bambu" },
-    "BAMBOO": { Id: 2, Code: "BAM", Name: "Bambu" },
+    // Abaca (Id: 2)
+    "ABA": { Id: 2, Code: "ABA", Name: "Abaca" },
+    "ABACA": { Id: 2, Code: "ABA", Name: "Abaca" },
     
-    "MOD": { Id: 3, Code: "MOD", Name: "Modal" },
-    "MODAL": { Id: 3, Code: "MOD", Name: "Modal" },
+    // Alpha (Id: 3)
+    "ALF": { Id: 3, Code: "ALF", Name: "Alfa" },
+    "ALFA": { Id: 3, Code: "ALF", Name: "Alfa" },
+    "ALPHA": { Id: 3, Code: "ALF", Name: "Alfa" },
     
-    "ELS": { Id: 4, Code: "ELS", Name: "Elastan" },
-    "ELASTAN": { Id: 4, Code: "ELS", Name: "Elastan" },
-    "ELASTANE": { Id: 4, Code: "ELS", Name: "Elastan" },
-    "SPANDEX": { Id: 4, Code: "ELS", Name: "Elastan" },
-    "EA": { Id: 4, Code: "ELS", Name: "Elastan" },
+    // Alginate (Id: 4)
+    "ALG": { Id: 4, Code: "ALG", Name: "Alginat" },
+    "ALGINATE": { Id: 4, Code: "ALG", Name: "Alginat" },
+    "ALGİNAT": { Id: 4, Code: "ALG", Name: "Alginat" },
     
-    "LIN": { Id: 6, Code: "LIN", Name: "Keten" },
-    "KETEN": { Id: 6, Code: "LIN", Name: "Keten" },
-    "LINEN": { Id: 6, Code: "LIN", Name: "Keten" },
-    "LI": { Id: 6, Code: "LIN", Name: "Keten" },
+    // Alpaca (Id: 5)
+    "ALP": { Id: 5, Code: "ALP", Name: "Alpaka" },
+    "ALPACA": { Id: 5, Code: "ALP", Name: "Alpaka" },
+    "ALPAKA": { Id: 5, Code: "ALP", Name: "Alpaka" },
     
-    "COT": { Id: 9, Code: "COT", Name: "Pamuk" },
-    "PAMUK": { Id: 9, Code: "COT", Name: "Pamuk" },
-    "COTTON": { Id: 9, Code: "COT", Name: "Pamuk" },
-    "CO": { Id: 9, Code: "COT", Name: "Pamuk" },
+    // Angora (Id: 6)
+    "ANG": { Id: 6, Code: "ANG", Name: "Angora" },
+    "ANGORA": { Id: 6, Code: "ANG", Name: "Angora" },
     
-    "PAM": { Id: 10, Code: "PAM", Name: "Poliamid" },
-    "POLİAMİD": { Id: 10, Code: "PAM", Name: "Poliamid" },
-    "POLYAMIDE": { Id: 10, Code: "PAM", Name: "Poliamid" },
-    "PA": { Id: 10, Code: "PAM", Name: "Poliamid" },
+    // Aramidic (Id: 7)
+    "ARM": { Id: 7, Code: "ARM", Name: "Aramid" },
+    "ARAMID": { Id: 7, Code: "ARM", Name: "Aramid" },
+    "ARAMIDIC": { Id: 7, Code: "ARM", Name: "Aramid" },
     
-    "PES": { Id: 13, Code: "PES", Name: "Polyester" },
-    "POLYESTER": { Id: 13, Code: "PES", Name: "Polyester" },
-    "PE": { Id: 13, Code: "PES", Name: "Polyester" },
-    "PL": { Id: 13, Code: "PES", Name: "Polyester" },
+    // Asbestos (Id: 8)
+    "ASB": { Id: 8, Code: "ASB", Name: "Asbest" },
+    "ASBESTOS": { Id: 8, Code: "ASB", Name: "Asbest" },
+    "ASBEST": { Id: 8, Code: "ASB", Name: "Asbest" },
     
-    "VSK": { Id: 14, Code: "VSK", Name: "Viskon" },
-    "VİSKON": { Id: 14, Code: "VSK", Name: "Viskon" },
-    "VISCOSE": { Id: 14, Code: "VSK", Name: "Viskon" },
-    "VI": { Id: 14, Code: "VSK", Name: "Viskon" },
-    "CV": { Id: 14, Code: "VSK", Name: "Viskon" }
+    // Acetate (Id: 9)
+    "ACE": { Id: 9, Code: "ACE", Name: "Asetat" },
+    "ACETATE": { Id: 9, Code: "ACE", Name: "Asetat" },
+    "ASETAT": { Id: 9, Code: "ACE", Name: "Asetat" },
+    
+    // Horsehair (Id: 10)
+    "HRS": { Id: 10, Code: "HRS", Name: "At Kılı" },
+    "HORSEHAIR": { Id: 10, Code: "HRS", Name: "At Kılı" },
+    "AT KILI": { Id: 10, Code: "HRS", Name: "At Kılı" },
+    
+    // Bamboo (Id: 11) - INACTIVE in PLM but keeping for compatibility
+    "BAM": { Id: 11, Code: "BAM", Name: "Bambu" },
+    "BAMBOO": { Id: 11, Code: "BAM", Name: "Bambu" },
+    "BAMBU": { Id: 11, Code: "BAM", Name: "Bambu" },
+    
+    // Viscous from Bamboo (Id: 12)
+    "VFB": { Id: 12, Code: "VFB", Name: "Bambudan Üretilmiş Viskon" },
+    
+    // Broom (Id: 13)
+    "BRO": { Id: 13, Code: "BRO", Name: "Broom" },
+    "BROOM": { Id: 13, Code: "BRO", Name: "Broom" },
+    
+    // Fiberglass (Id: 14)
+    "FIB": { Id: 14, Code: "FIB", Name: "Cam Elyapı" },
+    "FIBERGLASS": { Id: 14, Code: "FIB", Name: "Cam Elyapı" },
+    "CAM ELYAFI": { Id: 14, Code: "FIB", Name: "Cam Elyapı" },
+    
+    // Cashgora (Id: 15)
+    "CAS": { Id: 15, Code: "CAS", Name: "Cashgora" },
+    "CASHGORA": { Id: 15, Code: "CAS", Name: "Cashgora" },
+    
+    // Cupro (Id: 16)
+    "CUP": { Id: 16, Code: "CUP", Name: "Cupro" },
+    "CUPRO": { Id: 16, Code: "CUP", Name: "Cupro" },
+    
+    // Leather (Id: 17)
+    "LEA": { Id: 17, Code: "LEA", Name: "Deri" },
+    "LEATHER": { Id: 17, Code: "LEA", Name: "Deri" },
+    "DERİ": { Id: 17, Code: "LEA", Name: "Deri" },
+    
+    // Camel Hair (Id: 18)
+    "CAM": { Id: 18, Code: "CAM", Name: "Deve Tüyü" },
+    "CAMEL": { Id: 18, Code: "CAM", Name: "Deve Tüyü" },
+    "DEVE TÜYÜ": { Id: 18, Code: "CAM", Name: "Deve Tüyü" },
+    
+    // Other Fibre (Id: 19)
+    "OTH": { Id: 19, Code: "OTH", Name: "Diğer Elyaf" },
+    "OTHER": { Id: 19, Code: "OTH", Name: "Diğer Elyaf" },
+    "DİĞER": { Id: 19, Code: "OTH", Name: "Diğer Elyaf" },
+    
+    // Elastane (Id: 20)
+    "ELS": { Id: 20, Code: "ELS", Name: "Elastan" },
+    "ELASTANE": { Id: 20, Code: "ELS", Name: "Elastan" },
+    "ELASTAN": { Id: 20, Code: "ELS", Name: "Elastan" },
+    "SPANDEX": { Id: 20, Code: "ELS", Name: "Elastan" },
+    "EA": { Id: 20, Code: "ELS", Name: "Elastan" },
+    "LYCRA": { Id: 20, Code: "ELS", Name: "Elastan" },
+    
+    // Elastodien (Id: 21)
+    "ELT": { Id: 21, Code: "ELT", Name: "Elastodien" },
+    "ELASTODIEN": { Id: 21, Code: "ELT", Name: "Elastodien" },
+    
+    // Elastolefin (Id: 22)
+    "ELF": { Id: 22, Code: "ELF", Name: "Elastolefin" },
+    "ELASTOLEFIN": { Id: 22, Code: "ELF", Name: "Elastolefin" },
+    
+    // Elastomultiester (Id: 23)
+    "EME": { Id: 23, Code: "EME", Name: "Elastomultiester" },
+    "ELASTOMULTIESTER": { Id: 23, Code: "EME", Name: "Elastomultiester" },
+    
+    // Film (Id: 24)
+    "FLM": { Id: 24, Code: "FLM", Name: "Film" },
+    "FILM": { Id: 24, Code: "FLM", Name: "Film" },
+    
+    // Floro Fiber (Id: 25)
+    "FFB": { Id: 25, Code: "FFB", Name: "Floro Elyafı" },
+    "FLORO": { Id: 25, Code: "FFB", Name: "Floro Elyafı" },
+    
+    // Floss (Id: 26)
+    "FLO": { Id: 26, Code: "FLO", Name: "Floş" },
+    "FLOSS": { Id: 26, Code: "FLO", Name: "Floş" },
+    
+    // Guanaco (Id: 27)
+    "GUA": { Id: 27, Code: "GUA", Name: "Guanako" },
+    "GUANACO": { Id: 27, Code: "GUA", Name: "Guanako" },
+    
+    // Henequen (Id: 28)
+    "HEN": { Id: 28, Code: "HEN", Name: "Henequen" },
+    "HENEQUEN": { Id: 28, Code: "HEN", Name: "Henequen" },
+    
+    // Coir Fiber (Id: 29)
+    "COI": { Id: 29, Code: "COI", Name: "Hindistan Cevizi Lifi" },
+    "COIR": { Id: 29, Code: "COI", Name: "Hindistan Cevizi Lifi" },
+    
+    // Down Feather (Id: 30)
+    "DFT": { Id: 30, Code: "DFT", Name: "İnce Kuş Tüyü" },
+    "DOWN": { Id: 30, Code: "DFT", Name: "İnce Kuş Tüyü" },
+    
+    // Silk (Id: 31)
+    "SLK": { Id: 31, Code: "SLK", Name: "İpek" },
+    "SILK": { Id: 31, Code: "SLK", Name: "İpek" },
+    "İPEK": { Id: 31, Code: "SLK", Name: "İpek" },
+    
+    // Jute (Id: 32)
+    "JUT": { Id: 32, Code: "JUT", Name: "Jut" },
+    "JUTE": { Id: 32, Code: "JUT", Name: "Jut" },
+    
+    // Paper (Id: 33)
+    "PPR": { Id: 33, Code: "PPR", Name: "Kayıt" },
+    "PAPER": { Id: 33, Code: "PPR", Name: "Kayıt" },
+    
+    // Kapok (Id: 34)
+    "KAP": { Id: 34, Code: "KAP", Name: "Kapok" },
+    "KAPOK": { Id: 34, Code: "KAP", Name: "Kapok" },
+    
+    // Carbon Fiber (Id: 35)
+    "CFB": { Id: 35, Code: "CFB", Name: "Karbon" },
+    "CARBON": { Id: 35, Code: "CFB", Name: "Karbon" },
+    "KARBON": { Id: 35, Code: "CFB", Name: "Karbon" },
+    
+    // Mixed Fiber (Id: 36)
+    "MFB": { Id: 36, Code: "MFB", Name: "Karışık Elyaf" },
+    "MIXED": { Id: 36, Code: "MFB", Name: "Karışık Elyaf" },
+    
+    // Cashmere (Id: 37)
+    "CSH": { Id: 37, Code: "CSH", Name: "Kaşmir" },
+    "CASHMERE": { Id: 37, Code: "CSH", Name: "Kaşmir" },
+    "KAŞMİR": { Id: 37, Code: "CSH", Name: "Kaşmir" },
+    
+    // Goat Hair (Id: 38)
+    "COA": { Id: 38, Code: "COA", Name: "Keçi Kılı" },
+    "GOAT": { Id: 38, Code: "COA", Name: "Keçi Kılı" },
+    "KEÇİ KILI": { Id: 38, Code: "COA", Name: "Keçi Kılı" },
+    
+    // Hemp (Id: 39)
+    "HMP": { Id: 39, Code: "HMP", Name: "Kenevir" },
+    "HEMP": { Id: 39, Code: "HMP", Name: "Kenevir" },
+    "KENEVİR": { Id: 39, Code: "HMP", Name: "Kenevir" },
+    
+    // Linen (Id: 40)
+    "LIN": { Id: 40, Code: "LIN", Name: "Keten" },
+    "LINEN": { Id: 40, Code: "LIN", Name: "Keten" },
+    "KETEN": { Id: 40, Code: "LIN", Name: "Keten" },
+    "LI": { Id: 40, Code: "LIN", Name: "Keten" },
+    
+    // Shearing Wool (Id: 41)
+    "SHW": { Id: 41, Code: "SHW", Name: "Kırkım Yünü" },
+    "SHEARING": { Id: 41, Code: "SHW", Name: "Kırkım Yünü" },
+    
+    // Chlorofibre (Id: 42)
+    "CHF": { Id: 42, Code: "CHF", Name: "Koloro lifi" },
+    "CHLOROFIBRE": { Id: 42, Code: "CHF", Name: "Koloro lifi" },
+    
+    // Beavers Hair (Id: 43)
+    "BVR": { Id: 43, Code: "BVR", Name: "Kunduz Kılı" },
+    "BEAVER": { Id: 43, Code: "BVR", Name: "Kunduz Kılı" },
+    
+    // Feather (Id: 44)
+    "FEA": { Id: 44, Code: "FEA", Name: "Kuş Tüyü" },
+    "FEATHER": { Id: 44, Code: "FEA", Name: "Kuş Tüyü" },
+    
+    // Lambs Wool (Id: 45)
+    "LWL": { Id: 45, Code: "LWL", Name: "Kuzu Yünü" },
+    "LAMB": { Id: 45, Code: "LWL", Name: "Kuzu Yünü" },
+    "KUZU": { Id: 45, Code: "LWL", Name: "Kuzu Yünü" },
+    
+    // Lama (Id: 46)
+    "LMA": { Id: 46, Code: "LMA", Name: "Lama" },
+    "LAMA": { Id: 46, Code: "LMA", Name: "Lama" },
+    
+    // Lyocell (Id: 47)
+    "LYC": { Id: 47, Code: "LYC", Name: "Lyocell" },
+    "LYOCELL": { Id: 47, Code: "LYC", Name: "Lyocell" },
+    
+    // Lurex (Id: 48)
+    "LRX": { Id: 48, Code: "LRX", Name: "Lureks" },
+    "LUREX": { Id: 48, Code: "LRX", Name: "Lureks" },
+    "LUREKS": { Id: 48, Code: "LRX", Name: "Lureks" },
+    
+    // Maguey (Id: 49)
+    "MGY": { Id: 49, Code: "MGY", Name: "Maguey" },
+    "MAGUEY": { Id: 49, Code: "MGY", Name: "Maguey" },
+    
+    // Melamine (Id: 50)
+    "MLM": { Id: 50, Code: "MLM", Name: "Melamin" },
+    "MELAMINE": { Id: 50, Code: "MLM", Name: "Melamin" },
+    "MELAMİN": { Id: 50, Code: "MLM", Name: "Melamin" },
+    
+    // Merino-Wool (Id: 51)
+    "MWL": { Id: 51, Code: "MWL", Name: "Merinos Yünü" },
+    "MERINO": { Id: 51, Code: "MWL", Name: "Merinos Yünü" },
+    "MERİNOS": { Id: 51, Code: "MWL", Name: "Merinos Yünü" },
+    
+    // Metal (Id: 52)
+    "MTL": { Id: 52, Code: "MTL", Name: "Metal" },
+    "METAL": { Id: 52, Code: "MTL", Name: "Metal" },
+    
+    // Modacrylic (Id: 53)
+    "MDA": { Id: 53, Code: "MDA", Name: "Modakrilik" },
+    "MODACRYLIC": { Id: 53, Code: "MDA", Name: "Modakrilik" },
+    "MODAKRİLİK": { Id: 53, Code: "MDA", Name: "Modakrilik" },
+    
+    // Modal (Id: 54)
+    "MDL": { Id: 54, Code: "MDL", Name: "Modal" },
+    "MODAL": { Id: 54, Code: "MDL", Name: "Modal" },
+    "MOD": { Id: 54, Code: "MDL", Name: "Modal" },
+    
+    // Mohair (Id: 55)
+    "MHR": { Id: 55, Code: "MHR", Name: "Moher" },
+    "MOHAIR": { Id: 55, Code: "MHR", Name: "Moher" },
+    "MOHER": { Id: 55, Code: "MHR", Name: "Moher" },
+    
+    // Cotton (Id: 56)
+    "COT": { Id: 56, Code: "COT", Name: "Pamuk" },
+    "COTTON": { Id: 56, Code: "COT", Name: "Pamuk" },
+    "PAMUK": { Id: 56, Code: "COT", Name: "Pamuk" },
+    "CO": { Id: 56, Code: "COT", Name: "Pamuk" },
+    
+    // Polyactide (Id: 57)
+    "PAK": { Id: 57, Code: "PAK", Name: "Poliaktid" },
+    "POLYACTIDE": { Id: 57, Code: "PAK", Name: "Poliaktid" },
+    
+    // Polyamide (Id: 58)
+    "PAM": { Id: 58, Code: "PAM", Name: "Poliamid" },
+    "POLYAMIDE": { Id: 58, Code: "PAM", Name: "Poliamid" },
+    "POLİAMİD": { Id: 58, Code: "PAM", Name: "Poliamid" },
+    "PA": { Id: 58, Code: "PAM", Name: "Poliamid" },
+    "NYLON": { Id: 58, Code: "PAM", Name: "Poliamid" },
+    
+    // Polycarbamide (Id: 59)
+    "PCM": { Id: 59, Code: "PCM", Name: "Polikarbamid" },
+    "POLYCARBAMIDE": { Id: 59, Code: "PCM", Name: "Polikarbamid" },
+    
+    // Polypropylene (Id: 60)
+    "PPL": { Id: 60, Code: "PPL", Name: "Polipropilen" },
+    "POLYPROPYLENE": { Id: 60, Code: "PPL", Name: "Polipropilen" },
+    "POLİPROPİLEN": { Id: 60, Code: "PPL", Name: "Polipropilen" },
+    "PP": { Id: 60, Code: "PPL", Name: "Polipropilen" },
+    
+    // Polyurethan (Id: 61)
+    "PUR": { Id: 61, Code: "PUR", Name: "Poliüretan" },
+    "POLYURETHANE": { Id: 61, Code: "PUR", Name: "Poliüretan" },
+    "POLİÜRETAN": { Id: 61, Code: "PUR", Name: "Poliüretan" },
+    "PU": { Id: 61, Code: "PUR", Name: "Poliüretan" },
+    
+    // Polyvinylecloride (Id: 62)
+    "PCL": { Id: 62, Code: "PCL", Name: "Polivinilklorür" },
+    "PVC": { Id: 62, Code: "PCL", Name: "Polivinilklorür" },
+    "POLİVİNİLKLORÜR": { Id: 62, Code: "PCL", Name: "Polivinilklorür" },
+    
+    // Polyester (Id: 63)
+    "PES": { Id: 63, Code: "PES", Name: "Poliester" },
+    "POLYESTER": { Id: 63, Code: "PES", Name: "Poliester" },
+    "POLİESTER": { Id: 63, Code: "PES", Name: "Poliester" },
+    "PE": { Id: 63, Code: "PES", Name: "Poliester" },
+    "PL": { Id: 63, Code: "PES", Name: "Poliester" },
+    "PET": { Id: 63, Code: "PES", Name: "Poliester" },
+    
+    // Protein (Id: 64)
+    "PRT": { Id: 64, Code: "PRT", Name: "Protein" },
+    "PROTEIN": { Id: 64, Code: "PRT", Name: "Protein" },
+    
+    // Ramie (Id: 65)
+    "RAM": { Id: 65, Code: "RAM", Name: "Rami" },
+    "RAMIE": { Id: 65, Code: "RAM", Name: "Rami" },
+    "RAMİ": { Id: 65, Code: "RAM", Name: "Rami" },
+    
+    // Rayon (Id: 66)
+    "RYN": { Id: 66, Code: "RYN", Name: "Rayon" },
+    "RAYON": { Id: 66, Code: "RYN", Name: "Rayon" },
+    
+    // Pure New Wool (Id: 67)
+    "PNW": { Id: 67, Code: "PNW", Name: "Saf Yeni Yün" },
+    "PURE WOOL": { Id: 67, Code: "PNW", Name: "Saf Yeni Yün" },
+    
+    // Cattle Hair (Id: 68)
+    "CHR": { Id: 68, Code: "CHR", Name: "Sığır Kılı" },
+    "CATTLE": { Id: 68, Code: "CHR", Name: "Sığır Kılı" },
+    
+    // Sisal (Id: 69)
+    "SIS": { Id: 69, Code: "SIS", Name: "Sisal" },
+    "SISAL": { Id: 69, Code: "SIS", Name: "Sisal" },
+    
+    // Otter Hair (Id: 70)
+    "OTR": { Id: 70, Code: "OTR", Name: "Su Samuru Kılı" },
+    "OTTER": { Id: 70, Code: "OTR", Name: "Su Samuru Kılı" },
+    
+    // Angora (Rabbit) (Id: 71)
+    "AGR": { Id: 71, Code: "AGR", Name: "Tavşan Yünü" },
+    "RABBIT": { Id: 71, Code: "AGR", Name: "Tavşan Yünü" },
+    
+    // Mohair (Tiftik) (Id: 72)
+    "MHE": { Id: 72, Code: "MHE", Name: "Tiftik" },
+    "TİFTİK": { Id: 72, Code: "MHE", Name: "Tiftik" },
+    
+    // Triacetate (Id: 73)
+    "TRA": { Id: 73, Code: "TRA", Name: "Triasetat" },
+    "TRIACETATE": { Id: 73, Code: "TRA", Name: "Triasetat" },
+    "TRİASETAT": { Id: 73, Code: "TRA", Name: "Triasetat" },
+    
+    // Trivinil (Id: 74)
+    "TRV": { Id: 74, Code: "TRV", Name: "Trivinil" },
+    "TRİVİNİL": { Id: 74, Code: "TRV", Name: "Trivinil" },
+    
+    // Vicuna (Id: 75)
+    "VIC": { Id: 75, Code: "VIC", Name: "Vicuna" },
+    "VICUNA": { Id: 75, Code: "VIC", Name: "Vicuna" },
+    
+    // Vinyl (Id: 76)
+    "VNY": { Id: 76, Code: "VNY", Name: "Vinil" },
+    "VINYL": { Id: 76, Code: "VNY", Name: "Vinil" },
+    "VİNİL": { Id: 76, Code: "VNY", Name: "Vinil" },
+    
+    // Vinylal (Id: 77)
+    "VIN": { Id: 77, Code: "VIN", Name: "Vinilal" },
+    "VINYLAL": { Id: 77, Code: "VIN", Name: "Vinilal" },
+    "VİNİLAL": { Id: 77, Code: "VIN", Name: "Vinilal" },
+    
+    // Viscose (Id: 78)
+    "VSC": { Id: 78, Code: "VSC", Name: "Viskoz" },
+    "VISCOSE": { Id: 78, Code: "VSC", Name: "Viskoz" },
+    "VİSKOZ": { Id: 78, Code: "VSC", Name: "Viskoz" },
+    "CV": { Id: 78, Code: "VSC", Name: "Viskoz" },
+    
+    // Yak (Id: 79)
+    "YAK": { Id: 79, Code: "YAK", Name: "Yak" },
+    
+    // Fleece Wool (Id: 80)
+    "FLW": { Id: 80, Code: "FLW", Name: "Yapağı Yünü" },
+    "FLEECE": { Id: 80, Code: "FLW", Name: "Yapağı Yünü" },
+    
+    // Wool (Id: 81)
+    "WOO": { Id: 81, Code: "WOO", Name: "Yün" },
+    "WOOL": { Id: 81, Code: "WOO", Name: "Yün" },
+    "YÜN": { Id: 81, Code: "WOO", Name: "Yün" },
+    "WO": { Id: 81, Code: "WOO", Name: "Yün" },
+    
+    // Polibütilen tereftalat (Id: 82)
+    "PBT": { Id: 82, Code: "PBT", Name: "Polibütilen tereftalat" },
+    "POLİBÜTİLEN": { Id: 82, Code: "PBT", Name: "Polibütilen tereftalat" },
+    
+    // TENSEL (Id: 83)
+    "TNS": { Id: 83, Code: "TNS", Name: "TENSEL" },
+    "TENSEL": { Id: 83, Code: "TNS", Name: "TENSEL" },
+    "TENCEL": { Id: 83, Code: "TNS", Name: "TENSEL" },
+    
+    // Viskon (Id: 84)
+    "VSK": { Id: 84, Code: "VSK", Name: "Viskon" },
+    "VİSKON": { Id: 84, Code: "VSK", Name: "Viskon" },
+    "VI": { Id: 84, Code: "VSK", Name: "Viskon" },
+    
+    // Poliolefin (Id: 85)
+    "POL": { Id: 85, Code: "POL", Name: "Poliolefin" },
+    "POLIOLEFIN": { Id: 85, Code: "POL", Name: "Poliolefin" },
+    "POLİOLEFİN": { Id: 85, Code: "POL", Name: "Poliolefin" },
+    
+    // Nylon (Id: 86)
+    "NYL": { Id: 86, Code: "NYL", Name: "Naylon" },
+    "NYLON": { Id: 86, Code: "NYL", Name: "Naylon" },
+    "NAYLON": { Id: 86, Code: "NYL", Name: "Naylon" },
+    "NY": { Id: 86, Code: "NYL", Name: "Naylon" }
 };
 
 /**
@@ -183,9 +541,9 @@ function createPLMMaterialPayload(plmData) {
     const fieldValues = [
         {
             FieldName: "MainCategoryId",
-            Value: 2,
-            ValueName: "Woven",
-            Code: "DK"
+            Value: 5,
+            ValueName: "Yapay Zeka",
+            Code: "AI"
         },
         {
             FieldName: "Description",
@@ -204,7 +562,7 @@ function createPLMMaterialPayload(plmData) {
         },
         {
             FieldName: "CreateId",
-            Value: 3
+            Value: 124
         },
         {
             FieldName: "Original_Name",
@@ -213,6 +571,29 @@ function createPLMMaterialPayload(plmData) {
         {
             FieldName: "Original_Description",
             Value: ""
+        },
+        {
+            FieldName: "Status",
+            Value: 105,
+            ValueName: 105
+        },
+        {
+            FieldName: "UserDefinedField5",
+            Value: 8,
+            ValueName: "%10",
+            Code: "DT008"
+        },
+        {
+            FieldName: "UOMId",
+            Value: 9,
+            ValueName: "Mt",
+            Code: "MT"
+        },
+        {
+            FieldName: "MaterialUserDefinedField12Ids",
+            Value: [1],
+            ValueName: "150 cm",
+            Code: "150"
         }
     ];
 
@@ -245,9 +626,9 @@ function createPLMMaterialPayload(plmData) {
     // Gramaj ve birim
     fieldValues.push({
         FieldName: "WeightUOMId",
-        Value: 1,
-        Code: "MU001",
-        ValueName: "GSM"
+        Value: 10,
+        Code: "GR",
+        ValueName: "Gr"
     });
 
     fieldValues.push({
@@ -266,7 +647,7 @@ function createPLMMaterialPayload(plmData) {
     const materialConstFieldValues = [
         {
             fieldName: "WeightUOMId",
-            value: 1
+            value: 10
         },
         {
             fieldName: "ActWidth",
@@ -303,9 +684,9 @@ function createPLMMaterialPayload(plmData) {
     // Final payload
     const payload = {
         Key: 0,
-        userId: "3",
+        userId: "124",
         notificationMessageKey: "CREATED_MATERIAL_OVERVIEW",
-        ModifyId: "3",
+        ModifyId: "124",
         FieldValues: fieldValues,
         SubEntities: [
             {
@@ -406,16 +787,38 @@ Bu kumaş etiket görselini analiz et ve aşağıdaki bilgileri çıkar.
 4. Elyaf sıralaması büyükten küçüğe olmalı (en yüksek yüzde Elyaf1)
 5. Eğer sadece 1 elyaf varsa (%100) sadece Elyaf1 doldur, diğerlerini boş bırak
 
-ELYAF KOD DÖNÜŞÜM TABLOSU:
-- PE, PES, PL, POLYESTER → PES
-- CO, COT, COTTON → COT
-- VI, CV, VSK, VISCOSE, VİSKON → VSK
-- LI, LIN, LINEN, KETEN → LIN
-- EA, ELS, ELASTAN, ELASTANE, SPANDEX → ELS
-- PA, PAM, POLYAMIDE, POLİAMİD → PAM
-- ACR, AKRİLİK, ACRYLIC → ACR
-- MOD, MODAL → MOD
-- BAM, BAMBU, BAMBOO → BAM
+ELYAF KOD DÖNÜŞÜM TABLOSU (86 elyaf tipi desteklenir):
+
+EN YAYIN KULLANILAN ELYAFLAR:
+- PE, PES, PL, PET, POLYESTER, POLİESTER → PES (Poliester)
+- CO, COT, COTTON, PAMUK → COT (Pamuk)
+- VI, CV, VSK, VSC, VISCOSE, VİSKON, VİSKOZ → VSK veya VSC (Viskon/Viskoz)
+- LI, LIN, LINEN, KETEN → LIN (Keten)
+- EA, ELS, ELASTANE, ELASTAN, SPANDEX, LYCRA → ELS (Elastan)
+- PA, PAM, POLYAMIDE, POLİAMİD, NY, NYL, NYLON, NAYLON → PAM veya NYL (Poliamid/Naylon)
+- ACR, ACRYLIC, AKRİLİK → ACR (Akrilik)
+- MOD, MDL, MODAL → MDL (Modal)
+- BAM, BAMBOO, BAMBU → BAM (Bambu)
+
+DİĞER ÖNEMLİ ELYAFLAR:
+- WO, WOO, WOOL, YÜN → WOO (Yün)
+- SLK, SILK, İPEK → SLK (İpek)
+- LYC, LYOCELL → LYC (Lyocell)
+- TNS, TENSEL, TENCEL → TNS (Tensel)
+- ACE, ACETATE, ASETAT → ACE (Asetat)
+- PP, PPL, POLYPROPYLENE, POLİPROPİLEN → PPL (Polipropilen)
+- PU, PUR, POLYURETHANE, POLİÜRETAN → PUR (Poliüretan)
+- PVC, PCL → PCL (PVC)
+- CSH, CASHMERE, KAŞMİR → CSH (Kaşmir)
+- MHR, MOHAIR, MOHER → MHR (Moher)
+- LEA, LEATHER, DERİ → LEA (Deri)
+- LRX, LUREX, LUREKS → LRX (Lureks)
+- RAM, RAMIE, RAMİ → RAM (Rami)
+- HMP, HEMP, KENEVİR → HMP (Kenevir)
+- JUT, JUTE → JUT (Jut)
+- SIS, SISAL → SIS (Sisal)
+
+NOT: Eğer elyaf kodu yukarıdaki listede yoksa, etiket üzerindeki kodu AYNEN kullan.
 
 Sadece JSON formatında cevap ver, başka açıklama ekleme:
 {

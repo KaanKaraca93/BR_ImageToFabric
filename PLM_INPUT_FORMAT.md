@@ -109,19 +109,32 @@ Content-Type: application/json
 
 ## 🧬 Elyaf Mapping Tablosu
 
-API otomatik olarak elyaf kodlarını PLM formatına çeviriyor:
+API otomatik olarak elyaf kodlarını PLM formatına çeviriyor. **86 elyaf tipi desteklenir!**
 
-| Görsel Kodu | PLM Code | PLM Name | PLM Id |
-|-------------|----------|----------|--------|
-| PE, PES, PL, POLYESTER | PES | Polyester | 13 |
-| CO, COT, COTTON | COT | Pamuk | 9 |
-| VI, CV, VSK, VISCOSE | VSK | Viskon | 14 |
-| LI, LIN, LINEN | LIN | Keten | 6 |
-| EA, ELS, ELASTAN, SPANDEX | ELS | Elastan | 4 |
-| PA, PAM, POLYAMIDE | PAM | Poliamid | 10 |
+### En Yaygın Kullanılan Elyaflar:
+
+| Görsel Kodu | PLM Code | PLM Name (TR) | PLM Id |
+|-------------|----------|---------------|--------|
+| PE, PES, PL, PET, POLYESTER | PES | Poliester | 63 |
+| CO, COT, COTTON | COT | Pamuk | 56 |
+| VI, CV, VSK, VSC, VISCOSE | VSK/VSC | Viskon/Viskoz | 84/78 |
+| LI, LIN, LINEN | LIN | Keten | 40 |
+| EA, ELS, ELASTANE, SPANDEX, LYCRA | ELS | Elastan | 20 |
+| PA, PAM, POLYAMIDE, NYLON | PAM | Poliamid | 58 |
+| NY, NYL, NYLON | NYL | Naylon | 86 |
 | ACR, ACRYLIC | ACR | Akrilik | 1 |
-| MOD, MODAL | MOD | Modal | 3 |
-| BAM, BAMBOO | BAM | Bambu | 2 |
+| MOD, MDL, MODAL | MDL | Modal | 54 |
+| BAM, BAMBOO | BAM | Bambu | 11 |
+| WO, WOO, WOOL | WOO | Yün | 81 |
+| SLK, SILK | SLK | İpek | 31 |
+| LYC, LYOCELL | LYC | Lyocell | 47 |
+| TNS, TENSEL, TENCEL | TNS | Tensel | 83 |
+
+### Diğer Desteklenen Elyaflar:
+
+Asetat, Polipropilen, Poliüretan, PVC, Kaşmir, Moher, Deri, Lureks, Rami, Kenevir, Jut, Sisal ve 60+ elyaf daha...
+
+**Toplam:** 86 farklı elyaf tipi mapping'i mevcut.
 
 ## 📋 Önemli Kurallar
 
