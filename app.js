@@ -124,6 +124,30 @@ const WIDTH_MAPPING = {
 };
 
 /**
+ * Para birimini PLM Currency ID'ye çevir
+ */
+function getCurrencyId(currency) {
+    if (!currency) return null;
+    
+    const currencyUpper = currency.toUpperCase().trim();
+    
+    const CURRENCY_MAPPING = {
+        "USD": 3,
+        "DOLLAR": 3,
+        "$": 3,
+        "TRY": 4,
+        "TL": 4,
+        "₺": 4,
+        "TÜRK LİRASI": 4,
+        "EUR": 1,
+        "EURO": 1,
+        "€": 1
+    };
+    
+    return CURRENCY_MAPPING[currencyUpper] || 3; // Default: USD
+}
+
+/**
  * Kumaş enini normalize et ve mapping'den bul
  */
 function findWidthMapping(width) {
@@ -583,7 +607,9 @@ function convertToPLMFormat(chatgptData) {
         Tedarikcisi: chatgptData.tedarikcisi || null,
         Tedarikci_Kodu: chatgptData.tedarikci_kodu || null,
         Gramaj: chatgptData.gramaj || null,
-        En: chatgptData.en || null
+        En: chatgptData.en || null,
+        Fiyat: chatgptData.fiyat || null,
+        ParaBirimi: chatgptData.para_birimi || null
     };
 
     // Elyaf bilgilerini işle (maksimum 5 elyaf)
@@ -990,6 +1016,150 @@ async function addMaterialSupplier(token, materialId) {
 }
 
 /**
+ * PLM'de tedarikçi fiyatı ekle
+ */
+async function addSupplierPrice(token, materialId, materialSupplierId, rowVersionText, price, currency) {
+    try {
+        console.log(`💰 Fiyat ekleniyor: ${price} ${currency}`);
+        
+        // Para birimini ID'ye çevir
+        const currencyId = getCurrencyId(currency);
+        console.log(`  Currency ID: ${currencyId} (${currency})`);
+        
+        const pricePayload = {
+            Key: parseInt(materialId),
+            userId: "124",
+            notificationMessageKey: "UPDATED_MATERIAL_OVERVIEW",
+            RowVersionText: rowVersionText,
+            ModifyId: "124",
+            FieldValues: [],
+            SubEntities: [
+                {
+                    key: materialSupplierId,
+                    subEntity: "MaterialSuppliers",
+                    fieldValues: [
+                        {
+                            fieldName: "MaterialSupplierId",
+                            value: materialSupplierId
+                        },
+                        {
+                            fieldName: "MaterialId",
+                            value: parseInt(materialId)
+                        },
+                        {
+                            fieldName: "SupplierId",
+                            value: 135
+                        },
+                        {
+                            fieldName: "Code",
+                            value: "1111111111"
+                        },
+                        {
+                            fieldName: "Name",
+                            value: "BR_KUMAS_FIYAT"
+                        },
+                        {
+                            fieldName: "SupplierName",
+                            value: "1111111111 - BR_KUMAS_FIYAT"
+                        },
+                        {
+                            fieldName: "SourcingCode",
+                            value: "1111111111"
+                        },
+                        {
+                            fieldName: "SourcingName",
+                            value: "BR_KUMAS_FIYAT"
+                        },
+                        {
+                            fieldName: "IsModified",
+                            value: 0
+                        },
+                        {
+                            fieldName: "ShareToPartnerColab",
+                            value: false
+                        },
+                        {
+                            fieldName: "IsMain",
+                            value: 1
+                        },
+                        {
+                            fieldName: "IsEem",
+                            value: false
+                        },
+                        {
+                            fieldName: "ModifyId",
+                            value: 0
+                        },
+                        {
+                            fieldName: "ModifyDate",
+                            value: "0001-01-01T00:00:00"
+                        },
+                        {
+                            fieldName: "IsDeleted",
+                            value: 0
+                        },
+                        {
+                            fieldName: "PurchasePrice",
+                            value: price
+                        },
+                        {
+                            fieldName: "PurcPrice",
+                            value: price
+                        },
+                        {
+                            fieldName: "PurcCurrId",
+                            value: currencyId
+                        }
+                    ],
+                    subEntities: []
+                }
+            ],
+            ModuleId: parseInt(materialId),
+            Schema: "FSH1"
+        };
+        
+        console.log('📦 Price Payload:', JSON.stringify(pricePayload, null, 2));
+        
+        // Material v2 save API'ye POST (aynı endpoint)
+        const materialUrl = `https://mingle-ionapi.eu1.inforcloudsuite.com/JKARFH4LCGZA78A5_PRD/FASHIONPLM/pdm/api/pdm/material/v2/save`;
+        
+        const response = await axios.post(
+            materialUrl,
+            pricePayload,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        
+        console.log('✅ Fiyat başarıyla eklendi!');
+        
+        return {
+            success: true,
+            response: response.data,
+            price: price,
+            currency: currency,
+            currency_id: currencyId
+        };
+        
+    } catch (error) {
+        console.error('❌ Fiyat ekleme hatası:');
+        console.error('Status:', error.response?.status);
+        console.error('Response Data:', JSON.stringify(error.response?.data, null, 2));
+        console.error('Error Message:', error.message);
+        
+        return {
+            success: false,
+            error: error.response?.data || error.message,
+            error_type: error.name,
+            error_status: error.response?.status
+        };
+    }
+}
+
+/**
  * PLM'de kumaş kodu aç
  */
 async function createMaterialInPLM(plmData) {
@@ -1025,10 +1195,47 @@ async function createMaterialInPLM(plmData) {
         console.log('🔗 Tedarikçi bilgisi ekleniyor...');
         const sourcingResult = await addMaterialSupplier(token, materialKey);
         
+        if (!sourcingResult.success) {
+            console.warn('⚠️  Tedarikçi eklenemedi, fiyat ekleme atlanıyor');
+            return {
+                success: true,
+                plm_response: response.data,
+                sourcing_response: sourcingResult,
+                material_description: `${plmData.Tedarikcisi} - ${plmData.Tedarikci_Kodu}`
+            };
+        }
+        
+        // Fiyat bilgisi varsa ekle
+        let priceResult = null;
+        if (plmData.Fiyat && sourcingResult.material_supplier_id && sourcingResult.update_main_response?.materialRowVersionText) {
+            console.log('💰 Fiyat bilgisi ekleniyor...');
+            
+            const rowVersionText = sourcingResult.update_main_response.materialRowVersionText;
+            const materialSupplierId = sourcingResult.material_supplier_id;
+            
+            priceResult = await addSupplierPrice(
+                token,
+                materialKey,
+                materialSupplierId,
+                rowVersionText,
+                plmData.Fiyat,
+                plmData.ParaBirimi || 'USD'
+            );
+            
+            if (priceResult.success) {
+                console.log('✅ Fiyat başarıyla eklendi!');
+            } else {
+                console.warn('⚠️  Fiyat eklenemedi ama kumaş ve tedarikçi başarılı');
+            }
+        } else {
+            console.log('ℹ️  Fiyat bilgisi yok, atlanıyor');
+        }
+        
         return {
             success: true,
             plm_response: response.data,
             sourcing_response: sourcingResult,
+            price_response: priceResult,
             material_description: `${plmData.Tedarikcisi} - ${plmData.Tedarikci_Kodu}`
         };
 
@@ -1075,6 +1282,7 @@ Bu kumaş etiket görselini analiz et ve aşağıdaki bilgileri çıkar.
 3. Gramaj ve En'den sadece SAYISAL değeri al (birim ve toleransları çıkar)
 4. Elyaf sıralaması büyükten küçüğe olmalı (en yüksek yüzde Elyaf1)
 5. Eğer sadece 1 elyaf varsa (%100) sadece Elyaf1 doldur, diğerlerini boş bırak
+6. FİYAT BİLGİSİ: Eğer görselde fiyat varsa, sadece sayısal değeri çıkar ve para birimini belirle (USD, TRY, EUR)
 
 ELYAF KOD DÖNÜŞÜM TABLOSU (86 elyaf tipi desteklenir):
 
@@ -1115,6 +1323,8 @@ Sadece JSON formatında cevap ver, başka açıklama ekleme:
     "tedarikci_kodu": "Ürün kodu",
     "gramaj": 190,
     "en": 145,
+    "fiyat": 16.50,
+    "para_birimi": "USD",
     "elyaf1_yuzde": 30,
     "elyaf1_kod": "PES",
     "elyaf2_yuzde": 29,
@@ -1127,7 +1337,14 @@ Sadece JSON formatında cevap ver, başka açıklama ekleme:
     "elyaf5_kod": "ELS"
 }
 
-NOT: Eğer 5'ten az elyaf varsa, boş alanları null bırak. Eğer bilgi yoksa null yaz.`;
+PARA BİRİMİ KURALLARI:
+- Dolar işareti ($), USD, DOLLAR → "USD"
+- TL, TRY, ₺, TÜRK LİRASI → "TRY"
+- EUR, €, EURO → "EUR"
+- Eğer para birimi belirtilmemişse → "USD" (default)
+
+NOT: Eğer 5'ten az elyaf varsa, boş alanları null bırak. Eğer bilgi yoksa null yaz.
+FİYAT: Eğer görselde fiyat bilgisi yoksa, fiyat ve para_birimi için null yaz.`;
 
         // 4. ChatGPT'ye gönder
         const response = await openai.chat.completions.create({
@@ -1469,14 +1686,18 @@ app.post('/test-plm', async (req, res) => {
     const startTime = Date.now();
     
     try {
-        // Request body'den test_width alabilir, yoksa default 190
+        // Request body'den test parametreleri al
         const testWidth = req.body.test_width || 190;
+        const testPrice = req.body.test_price || 16.50;
+        const testCurrency = req.body.test_currency || 'USD';
         
         const testData = {
             Tedarikcisi: "TEST KUMAŞ A.Ş.",
             Tedarikci_Kodu: "TEST-001",
             Gramaj: 200,
             En: testWidth,
+            Fiyat: testPrice,
+            ParaBirimi: testCurrency,
             Elyaf1Yuzde: 80,
             Elyaf1: "Poliester",
             Elyaf1Id: 63,
