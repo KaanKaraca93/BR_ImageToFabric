@@ -639,8 +639,8 @@ function createPLMMaterialPayload(plmData) {
     });
 
     fieldValues.push({
-        fieldName: "IsSetAsMainSupplier",
-        value: false
+        FieldName: "IsSetAsMainSupplier",
+        Value: false
     });
 
     // SubEntities - MaterialConst
@@ -749,12 +749,17 @@ async function createMaterialInPLM(plmData) {
         };
 
     } catch (error) {
-        console.error('❌ PLM kumaş açma hatası:', error.response?.data || error.message);
+        console.error('❌ PLM kumaş açma hatası:');
+        console.error('Status:', error.response?.status);
+        console.error('Response Data:', JSON.stringify(error.response?.data, null, 2));
+        console.error('Error Message:', error.message);
         
         return {
             success: false,
             error: error.response?.data || error.message,
-            error_type: error.name
+            error_type: error.name,
+            error_status: error.response?.status,
+            error_details: error.response?.data
         };
     }
 }
