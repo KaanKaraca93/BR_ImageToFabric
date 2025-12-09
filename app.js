@@ -78,6 +78,91 @@ async function getAccessToken() {
     return accessToken;
 }
 
+// Kumaş Eni Mapping Tablosu (MaterialUserDefinedField12)
+// PLM OData API'den alınan 40 kumaş eni değeri
+const WIDTH_MAPPING = {
+    "50": { Id: 40, Code: "50", Name: "50 CM" },
+    "90": { Id: 36, Code: "090", Name: "90 CM" },
+    "100": { Id: 35, Code: "100", Name: "100 CM" },
+    "110": { Id: 34, Code: "110", Name: "110 CM" },
+    "120": { Id: 33, Code: "120", Name: "120 CM" },
+    "130": { Id: 9, Code: "130", Name: "130 cm" },
+    "132": { Id: 15, Code: "132", Name: "132 cm" },
+    "135": { Id: 4, Code: "135", Name: "135 cm" },
+    "137": { Id: 8, Code: "137", Name: "137 cm" },
+    "138": { Id: 14, Code: "138", Name: "138 cm" },
+    "140": { Id: 5, Code: "140", Name: "140 cm" },
+    "142": { Id: 12, Code: "142", Name: "142 cm" },
+    "143": { Id: 10, Code: "143", Name: "143 cm" },
+    "144": { Id: 20, Code: "144", Name: "144 cm" },
+    "145": { Id: 11, Code: "145", Name: "145 cm" },
+    "146": { Id: 3, Code: "146", Name: "146 cm" },
+    "147": { Id: 13, Code: "147", Name: "147 cm" },
+    "148": { Id: 2, Code: "148", Name: "148 cm" },
+    "149": { Id: 26, Code: "149", Name: "149 cm" },
+    "150": { Id: 1, Code: "150", Name: "150 cm" },
+    "152": { Id: 25, Code: "152", Name: "152 cm" },
+    "153": { Id: 17, Code: "153", Name: "153 cm" },
+    "155": { Id: 16, Code: "155", Name: "155 cm" },
+    "156": { Id: 31, Code: "156", Name: "156 cm" },
+    "159": { Id: 23, Code: "159", Name: "159 cm" },
+    "160": { Id: 6, Code: "160", Name: "160 cm" },
+    "162": { Id: 22, Code: "162", Name: "162 cm" },
+    "163": { Id: 18, Code: "163", Name: "163 cm" },
+    "165": { Id: 24, Code: "165", Name: "165 cm" },
+    "168": { Id: 21, Code: "168", Name: "168 cm" },
+    "169": { Id: 7, Code: "169", Name: "169 cm" },
+    "170": { Id: 30, Code: "170", Name: "170 cm" },
+    "175": { Id: 32, Code: "175", Name: "175 cm" },
+    "180": { Id: 27, Code: "180", Name: "180 cm" },
+    "185": { Id: 28, Code: "185", Name: "185 cm" },
+    "190": { Id: 29, Code: "190", Name: "190 cm" },
+    "200": { Id: 37, Code: "200", Name: "200 CM" },
+    "210": { Id: 38, Code: "210", Name: "210 CM" },
+    "215": { Id: 39, Code: "215", Name: "215 cm" },
+    "999": { Id: 19, Code: "999", Name: "999 cm" }
+};
+
+/**
+ * Kumaş enini normalize et ve mapping'den bul
+ */
+function findWidthMapping(width) {
+    if (!width) return null;
+    
+    // Sayısal değeri string'e çevir
+    const widthStr = String(width).trim();
+    
+    // Direkt mapping'de var mı kontrol et
+    if (WIDTH_MAPPING[widthStr]) {
+        return WIDTH_MAPPING[widthStr];
+    }
+    
+    // En yakın değeri bul (tolerance: ±5 cm)
+    const widthNum = parseInt(widthStr);
+    if (isNaN(widthNum)) return null;
+    
+    const availableWidths = Object.keys(WIDTH_MAPPING).map(w => parseInt(w)).filter(w => w !== 999).sort((a, b) => a - b);
+    
+    // En yakın değeri bul
+    let closest = availableWidths[0];
+    let minDiff = Math.abs(widthNum - closest);
+    
+    for (const w of availableWidths) {
+        const diff = Math.abs(widthNum - w);
+        if (diff < minDiff) {
+            minDiff = diff;
+            closest = w;
+        }
+    }
+    
+    // 5 cm'den fazla fark varsa 999 (diğer) döndür
+    if (minDiff > 5) {
+        return WIDTH_MAPPING["999"];
+    }
+    
+    return WIDTH_MAPPING[String(closest)];
+}
+
 // Elyaf Dönüşüm Tablosu (BR Tenant - JKARFH4LCGZA78A5_PRD)
 // PLM OData API'den alınan 86 elyaf tipi
 const ELYAF_MAPPING = {
@@ -588,20 +673,35 @@ function createPLMMaterialPayload(plmData) {
             Value: 9,
             ValueName: "Mt",
             Code: "MT"
-        },
-        {
+        }
+    ];
+    
+    // Kumaş eni - Dinamik mapping
+    const widthMapping = findWidthMapping(plmData.En);
+    if (widthMapping) {
+        fieldValues.push({
+            FieldName: "MaterialUserDefinedField12Ids",
+            Value: [widthMapping.Id],
+            ValueName: widthMapping.Name,
+            Code: widthMapping.Code
+        });
+    } else {
+        // En bilgisi yoksa veya bulunamazsa, default 150 cm
+        fieldValues.push({
             FieldName: "MaterialUserDefinedField12Ids",
             Value: [1],
             ValueName: "150 cm",
             Code: "150"
-        },
-        {
-            FieldName: "MaterialUserDefinedField11",
-            Value: 2,
-            ValueName: "YERLİ KUMAŞ",
-            Code: "002"
-        }
-    ];
+        });
+    }
+    
+    // Yerli kumaş bilgisi - Sabit
+    fieldValues.push({
+        FieldName: "MaterialUserDefinedField11",
+        Value: 2,
+        ValueName: "YERLİ KUMAŞ",
+        Code: "002"
+    });
 
     // Elyaf bilgilerini ekle (dinamik)
     for (let i = 1; i <= 5; i++) {
@@ -1183,11 +1283,14 @@ app.post('/test-plm', async (req, res) => {
     const startTime = Date.now();
     
     try {
+        // Request body'den test_width alabilir, yoksa default 190
+        const testWidth = req.body.test_width || 190;
+        
         const testData = {
             Tedarikcisi: "TEST KUMAŞ A.Ş.",
             Tedarikci_Kodu: "TEST-001",
             Gramaj: 200,
-            En: 150,
+            En: testWidth,
             Elyaf1Yuzde: 80,
             Elyaf1: "Poliester",
             Elyaf1Id: 63,
