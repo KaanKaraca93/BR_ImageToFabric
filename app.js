@@ -812,6 +812,103 @@ function createPLMMaterialPayload(plmData) {
 }
 
 /**
+ * PLM'de kumaşa tedarikçi ekle (sourcing)
+ */
+async function addMaterialSupplier(token, materialId) {
+    try {
+        console.log(`  Material ID: ${materialId}`);
+        
+        // TempId oluştur (timestamp-based unique ID)
+        const tempId = `MTc2NTMwNDE1MzgzMg==${materialId}`;
+        
+        const sourcingPayload = {
+            MaterialId: String(materialId),
+            action: "New",
+            MaterialSuppliers: [
+                {
+                    Key: 0,
+                    FieldValues: [
+                        {
+                            FieldName: "TempId",
+                            Value: tempId
+                        },
+                        {
+                            FieldName: "SupplierId",
+                            Value: 135
+                        },
+                        {
+                            FieldName: "MaterialId",
+                            Value: String(materialId)
+                        },
+                        {
+                            FieldName: "Code",
+                            Value: "1111111111"
+                        },
+                        {
+                            FieldName: "Name",
+                            Value: "BR_KUMAS_FIYAT"
+                        },
+                        {
+                            FieldName: "CountryId"
+                        },
+                        {
+                            FieldName: "PurchasePrice",
+                            Value: null
+                        },
+                        {
+                            FieldName: "PurcCurrId"
+                        }
+                    ]
+                }
+            ],
+            userId: 124,
+            createId: 124,
+            modifyId: 124,
+            notificationMessageKey: "CREATED_MATERIAL_PARTNERS",
+            Schema: "FSH1"
+        };
+        
+        console.log('📦 Sourcing Payload:', JSON.stringify(sourcingPayload, null, 2));
+        
+        // Sourcing API'ye POST
+        const sourcingUrl = `https://mingle-ionapi.eu1.inforcloudsuite.com/JKARFH4LCGZA78A5_PRD/FASHIONPLM/pdm/api/pdm/material/sourcing/save`;
+        
+        const response = await axios.post(
+            sourcingUrl,
+            sourcingPayload,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        
+        console.log('✅ Tedarikçi başarıyla eklendi!');
+        
+        return {
+            success: true,
+            response: response.data,
+            supplier_code: "1111111111",
+            supplier_name: "BR_KUMAS_FIYAT"
+        };
+        
+    } catch (error) {
+        console.error('❌ Tedarikçi ekleme hatası:');
+        console.error('Status:', error.response?.status);
+        console.error('Response Data:', JSON.stringify(error.response?.data, null, 2));
+        console.error('Error Message:', error.message);
+        
+        return {
+            success: false,
+            error: error.response?.data || error.message,
+            error_type: error.name,
+            error_status: error.response?.status
+        };
+    }
+}
+
+/**
  * PLM'de kumaş kodu aç
  */
 async function createMaterialInPLM(plmData) {
@@ -839,10 +936,18 @@ async function createMaterialInPLM(plmData) {
         );
 
         console.log('✅ PLM\'de kumaş kodu başarıyla açıldı!');
+        console.log(`📋 Material Key: ${response.data.key}`);
+        
+        const materialKey = response.data.key;
+        
+        // Tedarikçi ekleme (sourcing)
+        console.log('🔗 Tedarikçi bilgisi ekleniyor...');
+        const sourcingResult = await addMaterialSupplier(token, materialKey);
         
         return {
             success: true,
             plm_response: response.data,
+            sourcing_response: sourcingResult,
             material_description: `${plmData.Tedarikcisi} - ${plmData.Tedarikci_Kodu}`
         };
 
