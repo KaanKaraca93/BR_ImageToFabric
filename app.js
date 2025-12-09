@@ -1018,7 +1018,7 @@ async function addMaterialSupplier(token, materialId) {
 /**
  * PLM'de tedarikçi fiyatı ekle
  */
-async function addSupplierPrice(token, materialId, materialSupplierId, rowVersionText, price, currency) {
+async function addSupplierPrice(token, materialId, materialSupplierId, rowVersionText, price, currency, plmData) {
     try {
         console.log(`💰 Fiyat ekleniyor: ${price} ${currency}`);
         
@@ -1026,13 +1026,85 @@ async function addSupplierPrice(token, materialId, materialSupplierId, rowVersio
         const currencyId = getCurrencyId(currency);
         console.log(`  Currency ID: ${currencyId} (${currency})`);
         
+        // FieldValues - PLM Auto Name Generator için gerekli alanlar
+        const fieldValues = [
+            {
+                FieldName: "Description",
+                Value: `${plmData.Tedarikcisi || 'Unknown'} - ${plmData.Tedarikci_Kodu || 'Unknown'}`,
+                ValueName: `${plmData.Tedarikcisi || 'Unknown'} - ${plmData.Tedarikci_Kodu || 'Unknown'}`
+            }
+        ];
+        
+        // Kumaş eni ekle
+        const widthMapping = findWidthMapping(plmData.En);
+        if (widthMapping) {
+            fieldValues.push({
+                FieldName: "MaterialUserDefinedField12Ids",
+                Value: [widthMapping.Id],
+                ValueName: widthMapping.Name,
+                Code: widthMapping.Code
+            });
+        }
+        
+        // SupplierId ekle
+        fieldValues.push({
+            FieldName: "SupplierId",
+            Value: 135,
+            ValueName: "BR_KUMAS_FIYAT",
+            Code: "1111111111"
+        });
+        
+        // Elyaf bilgilerini ekle
+        for (let i = 1; i <= 5; i++) {
+            const yuzde = plmData[`Elyaf${i}Yuzde`];
+            const id = plmData[`Elyaf${i}Id`];
+            const name = plmData[`Elyaf${i}`];
+            const code = plmData[`Elyaf${i}Code`];
+
+            if (yuzde && id) {
+                fieldValues.push({
+                    FieldName: `ContPercent${i}`,
+                    Value: yuzde,
+                    ValueName: yuzde,
+                    Code: null
+                });
+
+                fieldValues.push({
+                    FieldName: `GLContentTypeId${i}`,
+                    Value: id,
+                    ValueName: name,
+                    Code: code
+                });
+            }
+        }
+        
+        // Gramaj bilgileri ekle
+        fieldValues.push({
+            FieldName: "WeightUOMId",
+            Value: 10,
+            Code: "GR",
+            ValueName: "Gr"
+        });
+
+        fieldValues.push({
+            FieldName: "Weight",
+            Value: plmData.Gramaj || 0,
+            Code: null,
+            ValueName: plmData.Gramaj || 0
+        });
+        
+        fieldValues.push({
+            FieldName: "IsSetAsMainSupplier",
+            Value: true
+        });
+        
         const pricePayload = {
             Key: parseInt(materialId),
             userId: "124",
             notificationMessageKey: "UPDATED_MATERIAL_OVERVIEW",
             RowVersionText: rowVersionText,
             ModifyId: "124",
-            FieldValues: [],
+            FieldValues: fieldValues,
             SubEntities: [
                 {
                     key: materialSupplierId,
@@ -1219,7 +1291,8 @@ async function createMaterialInPLM(plmData) {
                 materialSupplierId,
                 rowVersionText,
                 plmData.Fiyat,
-                plmData.ParaBirimi || 'USD'
+                plmData.ParaBirimi || 'USD',
+                plmData
             );
             
             if (priceResult.success) {
