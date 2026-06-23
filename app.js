@@ -3,6 +3,10 @@
  * ChatGPT API ile görsel analizi
  */
 
+// IPv6 öncelikli DNS, bazı bulut ortamlarında (Heroku) OpenAI'a giden
+// bağlantının resetlenmesine ("Premature close") yol açabiliyor; IPv4'ü önceliyoruz.
+require('dns').setDefaultResultOrder('ipv4first');
+
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -20,8 +24,12 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
 // OpenAI client
+// maxRetries + timeout: Heroku'da görülen "Premature close" (bayat keep-alive
+// soketi) hatalarında istek otomatik olarak taze bağlantıyla yeniden denenir.
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
+    apiKey: process.env.OPENAI_API_KEY,
+    maxRetries: 3,
+    timeout: 60000
 });
 
 /*********************************************************

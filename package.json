@@ -8,8 +8,7 @@
     "dev": "nodemon app.js",
     "test": "node test.js",
     "test:health": "node test_health.js",
-    "test:all": "npm run test:health && npm run test",
-    "test:image": "node test_image_upload.js"
+    "test:all": "npm run test:health && npm run test"
   },
   "keywords": [
     "fabric",
@@ -20,6 +19,9 @@
   ],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "axios": "^1.6.2",
     "cors": "^2.8.5",
